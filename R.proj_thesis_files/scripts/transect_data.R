@@ -1,9 +1,6 @@
 
 # Attempt 1 to make transect data graph -------------------------------
 
-# Script for making a graph using Transect Data (field data)
-#Installing of packages I might need?
-
 library(tidyverse)
 
 transectdata <-read.csv("./data/seedlings.csv")
@@ -11,7 +8,14 @@ climdata <-read.csv("./data/microclim.csv")
 
 #Attempt 2 at extracting data from two different files based on a common variable with the help of Andrew. Using dplyr select to take the two columns (select) and (distinct). Then take clim data and join with seedling data?
 
+elevtable <- select(climdata,site,elevation)%>%
+  distinct()
 
+#This will distinguish burn and unburn data, as well as convert counts to presences.
+
+tdata_elev <- inner_join(elevtable,transectdata)%>%
+  separate(site,into="site_type",sep="-",remove=FALSE,extra="drop")%>%
+  mutate("pres.1"=as.numeric(count.1!=0),"pres.2"=as.numeric(count.2!=0))
 
 
 
