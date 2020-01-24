@@ -42,15 +42,19 @@ t.test(transectdata$count.1,transectdata$count.2,paired=TRUE)
  
 # logistic regression of presence/absence vs elevation
 library(lme4)
+library(visreg)
 #the most comprehensive model - not enough data to work
-lrmodA <- glmer(pres.1 ~ poly(elevation,2)*site_type + (1|site), data=filter(tdata_elev, species=="PICENG"), family=binomial)
-#simplify A by dropping random effect 
+lrmodA <- glmer(pres.1 ~ poly(elevati/on,2)*site_type + (1|site), data=filter(tdata_elev, species=="PICENG"), family=binomial)
+#simplify A by dropping random effect
 lrmodB <- glm(pres.1 ~ poly(elevation,2)*site_type, data=filter(tdata_elev, species=="PICENG"), family=binomial)
 summary(lrmodB)
-# the fact that the RP transect is all zeros could be problematic. filter to only burned transect
+visreg(lrmodB, xvar="elevation", by="site_type", scale="response")
+# the fact that the RP transect is all zeros is problematic. filter to only burned transect
 lrmodC <- glm(pres.1 ~ poly(elevation,2), data=filter(tdata_elev, species=="PICENG", site_type=="RPN"), family=binomial)
 summary(lrmodC)
+visreg(lrmodC, xvar="elevation", scale="response")
 # put random effect back in? nope
 lrmodD <- glmer(pres.1 ~ poly(elevation,2) + (1|site), data=filter(tdata_elev, species=="PICENG", site_type=="RPN"), family=binomial)
 summary(lrmodD)
+visreg(lrmodD, xvar="elevation", scale="response")
 
