@@ -15,16 +15,17 @@ elevtable <- select(climdata,site,elevation)%>%
 
 tdata_elev <- inner_join(elevtable,transectdata)%>%
   separate(site,into="site_type",sep="-",remove=FALSE,extra="drop")%>%
-  mutate("pres.1"=as.numeric(count.1!=0),"pres.2"=as.numeric(count.2!=0))
+  mutate("pres.1"=as.numeric(count.1!=0),"pres.2"=as.numeric(count.2!=0))%>%
+  group_by(site,species,canopy,elevation,site_type)%>%
+  summarize(pres.1=sum(pres.1))
+  
 
-
-
-
+ggplot(tdata_elev,aes(x=elevation,y=pres.1, colour=site_type))+
+  facet_wrap(~species)+
+  geom_point()
 
 
 # Attempt at Stats take 1 -------------------------------------------------
-
-#I am going to try to seperate burn data from unburn data, so I can then compare the two.
 
 
 early <- c(transectdata$site,transectdata$count.1)
