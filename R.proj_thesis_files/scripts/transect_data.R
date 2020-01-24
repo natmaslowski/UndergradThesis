@@ -3,8 +3,13 @@
 
 library(tidyverse)
 
+# for natalie to read in files
 transectdata <-read.csv("./data/seedlings.csv")
 climdata <-read.csv("./data/microclim.csv")
+
+# for amy to read in files
+transectdata <-read.csv("R.proj_thesis_files/data/seedlings.csv")
+climdata <-read.csv("R.proj_thesis_files/data/microclim.csv")
 
 #Attempt 2 at extracting data from two different files based on a common variable with the help of Andrew. Using dplyr select to take the two columns (select) and (distinct). Then take clim data and join with seedling data?
 
