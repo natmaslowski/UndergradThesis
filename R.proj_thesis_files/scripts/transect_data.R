@@ -5,6 +5,7 @@ library(tidyverse)
 
 # for natalie to read in files
 transectdata <-read.csv("./data/seedlings.csv")
+
 climdata <-read.csv("./data/microclim.csv")
 
 # for amy to read in files
@@ -39,7 +40,10 @@ late <- c(transectdata$site,transectdata$count.2)
 
 #A quick and dirty attempt to compare my early and late season census to see if there was a significant difference. Apparently there was, because p-value is 0.01798?
 t.test(transectdata$count.1,transectdata$count.2,paired=TRUE)
- 
+
+#Amy's changes
+install.packages("lme4")
+install.packages("visreg")
 # logistic regression of presence/absence vs elevation
 library(lme4)
 library(visreg)
@@ -58,3 +62,16 @@ lrmodD <- glmer(pres.1 ~ poly(elevation,2) + (1|site), data=filter(tdata_elev, s
 summary(lrmodD)
 visreg(lrmodD, xvar="elevation", scale="response")
 
+#Trying to make a chi squared test to compare burn and unburned data using counts.
+
+rpn <- filter(tdata_elev,site_type=="RPN")%>%
+  select(count.1)
+
+rpn <- as.vector(rpn$count.1)
+
+rp <-filter(tdata_elev,site_type=="RP")%>%
+  select(count.1)
+
+rp <- as.vector(rp$count.1)
+
+chisq.test(rpn,rp)
