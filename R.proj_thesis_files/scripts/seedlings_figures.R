@@ -15,28 +15,56 @@ tdata_elev2 <- inner_join(elevtable,transectdata)%>%
 
 #This is my attempt at making a figure of counts~elevation as a bar graph.
 
-ggplot(tdata_elev2,aes(x=elevation,y=count.1, colour=site_type))+
-  geom_bar(stat="identity", width=15)+
+ggplot(tdata_elev2,aes(x=site_type,y=count.1))+
+  geom_boxplot()+
   labs( 
-       x="Elevation (m)", y = "Number of Recruits")+
-  theme_classic()+
-  geom_errorbar()
-
-#This only graphed counts as a function of elevation for ALL species, not exacty what I need.
-
-#I need to separate burn transect data and unburn transect data, then I need to graph their counts as a function of elevation in a bar graph. 
-
-burndata <- select(tdata_elev2,site_type,count.1,elevation)%>%
-  filter(site_type=="RPN")
-
-nonburndata <- select(tdata_elev2,site_type,count.1,elevation)%>%
-  filter(site_type=="RP")
-
-ggplot(burndata,aes(x=elevation,y=count.1, colour=site_type))+
-  geom_bar(stat="identity", fill="steelblue")+
-  theme_minimal()
-
+       x="Site type", y = "Number of Recruits")+
+  theme_classic()
+#DONT FORGET TO ADD ERROR BARS?
 
 # Figure of recruits~elevation as a regression line -----------------------
+library(visreg)
+library(lme4)
+
+#Natalie's attempt to make a figure? Is this correct? I also don't know if I should use different variable names for "lrmodA"? I just used the same ones using your script from the previous attempts of linear regressions
+
+lrmodA <- glmer(count.1 ~ poly(elevation,2)*site_type + (1|site), data=filter(tdata_elev2, species), family=binomial)
+#simplify A by dropping random effect
+lrmodB <- glm(count.1 ~ poly(elevation,2)*site_type, data=filter(tdata_elev2, species), family=binomial)
+summary(lrmodB)
+visreg(lrmodB, xvar="elevation", by="site_type", scale="response")
 
 
+# Figure of richness~elevation as a linear regression ---------------------
+
+#This is my attempt at creating a table of data that includes richness.
+rich.data_lr <- inner_join(elevtable,transectdata)%>%
+  separate(site,into="site_type",sep="-",remove=FALSE,extra="drop")%>%
+  filter(count.1 !=0)%>%
+  group_by(site_type,plot,elevation)%>%
+  distinct(count.1)
+
+#Did I use the correct input of richness?
+#Also I am not sure why, but I am getting an Error in " eval(inp, data, env) : object 'elevation' not found ". I am not sure why this is? I adjust the above rich.data_lr table to include elevation, so I don't understand where the error is?
+lrmodC <- glmer(count.1 ~ poly(elevation,2)*site_type + (1|site), data=filter(rich.data_lr, species), family=binomial)
+#simplify C by dropping random effect
+lrmodD <- glm(count.1 ~ poly(elevation,2)*site_type, data=filter(rich.data_lr, species), family=binomial)
+summary(lrmodD)
+visreg(lrmodD, xvar="elevation", by="site_type", scale="response")
+
+# Figure of richness~elevation as a boxplot graph -------------------------
+library(dplyr)
+
+rich.data <- inner_join(elevtable,transectdata)%>%
+  separate(site,into="site_type",sep="-",remove=FALSE,extra="drop")%>%
+  filter(count.1 !=0)%>%
+  group_by(site_type,plot)%>%
+  distinct(count.1)
+
+#This is my attempt at making a boxplot as above modelling richness as a function of the site type.
+
+ggplot( rich.data,aes(x=site_type,y=count.1))+
+  geom_boxplot()+
+  labs( 
+    x="Site Type", y = "Species Richness")+
+  theme_classic()
