@@ -15,24 +15,35 @@ tdata_elev2 <- inner_join(elevtable,transectdata)%>%
 
 #This is my attempt at making a figure of counts~elevation as a bar graph.
 
+# graphing raw data (show as figure panel)
 ggplot(tdata_elev2,aes(x=site_type,y=count.1))+
   geom_boxplot()+
   labs( 
        x="Site type", y = "Number of Recruits")+
   theme_classic()
-#DONT FORGET TO ADD ERROR BARS?
+
+# statistical model (report in text or table)
+mod1 <- glm(count.1 ~ site_type, family="poisson", data=tdata_elev2)
+visreg(mod1)
+
+
 
 # Figure of recruits~elevation as a regression line -----------------------
 library(visreg)
 library(lme4)
 
-#Natalie's attempt to make a figure? Is this correct? I also don't know if I should use different variable names for "lrmodA"? I just used the same ones using your script from the previous attempts of linear regressions
+# again, graph raw data
+ggplot(tdata_elev2,aes(x=elevation,y=count.1), groupName=site_type)+
+  geom_point(color=site_type)+  #not working yet
+  labs( 
+    x="Elevation", y = "Number of Recruits")+
+  theme_classic()
 
-lrmodA <- glmer(count.1 ~ poly(elevation,2)*site_type + (1|site), data=filter(tdata_elev2, species), family=binomial)
+lrmodA <- glmer(count.1 ~ poly(elevation,2)*site_type + (1|site), data=tdata_elev2, family=poisson)
 #simplify A by dropping random effect
-lrmodB <- glm(count.1 ~ poly(elevation,2)*site_type, data=filter(tdata_elev2, species), family=binomial)
+lrmodB <- glm(count.1 ~ poly(elevation,2)*site_type, data = tdata_elev2, family=poisson)
 summary(lrmodB)
-visreg(lrmodB, xvar="elevation", by="site_type", scale="response")
+visreg(lrmodB, xvar="elevation", by="site_type")
 
 
 # Figure of richness~elevation as a linear regression ---------------------
