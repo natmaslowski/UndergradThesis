@@ -1,5 +1,6 @@
 #Attempt to make figures for Results section
 library(tidyverse)
+library(broom)
 
 # Figure of recruits~elevation as a bar graph -----------------------------
 
@@ -13,8 +14,6 @@ elevtable <- select(climdata,site,elevation)%>%
 tdata_elev2 <- inner_join(elevtable,transectdata)%>%
   separate(site,into="site_type",sep="-",remove=FALSE,extra="drop")
 
-#This is my attempt at making a figure of counts~elevation as a bar graph.
-
 # graphing raw data (show as figure panel)
 ggplot(tdata_elev2,aes(x=site_type,y=count.1))+
   geom_boxplot()+
@@ -26,14 +25,15 @@ ggplot(tdata_elev2,aes(x=site_type,y=count.1))+
 mod1 <- glm(count.1 ~ site_type, family="poisson", data=tdata_elev2)
 visreg(mod1)
 
-
+tidy(mod1)
+summary(mod1)
 
 # Figure of recruits~elevation as a regression line -----------------------
 library(visreg)
 library(lme4)
 
 # again, graph raw data
-ggplot(tdata_elev2,aes(x=elevation,y=count.1), groupName=site_type)+
+ggplot(tdata_elev2,aes(x=elevation,y=count.1) (groupname= )+
   geom_point(color=site_type)+  #not working yet
   labs( 
     x="Elevation", y = "Number of Recruits")+
@@ -42,24 +42,22 @@ ggplot(tdata_elev2,aes(x=elevation,y=count.1), groupName=site_type)+
 lrmodA <- glmer(count.1 ~ poly(elevation,2)*site_type + (1|site), data=tdata_elev2, family=poisson)
 #simplify A by dropping random effect
 lrmodB <- glm(count.1 ~ poly(elevation,2)*site_type, data = tdata_elev2, family=poisson)
+
 summary(lrmodB)
 visreg(lrmodB, xvar="elevation", by="site_type")
 
 
 # Figure of richness~elevation as a linear regression ---------------------
 
-#This is my attempt at creating a table of data that includes richness.
+#This is creating a table of data that includes richness.
 rich.data_lr <- inner_join(elevtable,transectdata)%>%
   separate(site,into="site_type",sep="-",remove=FALSE,extra="drop")%>%
   filter(count.1 !=0)%>%
   group_by(site_type,plot,elevation)%>%
   distinct(count.1)
 
-#Did I use the correct input of richness?
-#Also I am not sure why, but I am getting an Error in " eval(inp, data, env) : object 'elevation' not found ". I am not sure why this is? I adjust the above rich.data_lr table to include elevation, so I don't understand where the error is?
-lrmodC <- glmer(count.1 ~ poly(elevation,2)*site_type + (1|site), data=filter(rich.data_lr, species), family=binomial)
-#simplify C by dropping random effect
-lrmodD <- glm(count.1 ~ poly(elevation,2)*site_type, data=filter(rich.data_lr, species), family=binomial)
+
+lrmodD <- glm(count.1 ~ poly(elevation,2)*site_type, data=rich.data_lr, family=poisson)
 summary(lrmodD)
 visreg(lrmodD, xvar="elevation", by="site_type", scale="response")
 
@@ -72,10 +70,17 @@ rich.data <- inner_join(elevtable,transectdata)%>%
   group_by(site_type,plot)%>%
   distinct(count.1)
 
-#This is my attempt at making a boxplot as above modelling richness as a function of the site type.
+#boxplot modelling richness as a function of the site type.
 
 ggplot( rich.data,aes(x=site_type,y=count.1))+
   geom_boxplot()+
   labs( 
     x="Site Type", y = "Species Richness")+
   theme_classic()
+
+# statistical model (report in text or table)
+mod2 <- glm(count.1 ~ site_type, family="poisson", data=rich.data)
+visreg(mod2)
+
+summary(mod2)
+tidy(mod2)
