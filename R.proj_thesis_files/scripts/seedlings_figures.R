@@ -33,10 +33,9 @@ library(visreg)
 library(lme4)
 
 # again, graph raw data
-ggplot(tdata_elev2,aes(x=elevation,y=count.1) (groupname= )+
-  geom_point(color=site_type)+  #not working yet
-  labs( 
-    x="Elevation", y = "Number of Recruits")+
+ggplot(tdata_elev2, aes(x=elevation,y=count.1)) +
+  geom_point(aes(color=factor(site_type))) +  
+  labs(x="Elevation", y = "Number of Recruits") +
   theme_classic()
 
 lrmodA <- glmer(count.1 ~ poly(elevation,2)*site_type + (1|site), data=tdata_elev2, family=poisson)
