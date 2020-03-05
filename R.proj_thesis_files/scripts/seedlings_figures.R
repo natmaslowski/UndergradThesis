@@ -63,11 +63,11 @@ visreg(lrmodD, xvar="elevation", by="site_type", scale="response")
 # Figure of richness~elevation as a boxplot graph -------------------------
 library(dplyr)
 
-rich.data <- inner_join(elevtable,transectdata)%>%
+rich.data <-tdata_elev2%>%
   separate(site,into="site_type",sep="-",remove=FALSE,extra="drop")%>%
   filter(count.1 !=0)%>%
-  group_by(site_type,plot)%>%
-  distinct(count.1)
+  group_by(site_type,site,plot)%>%
+  distinct(species)
 
 #boxplot modelling richness as a function of the site type.
 
