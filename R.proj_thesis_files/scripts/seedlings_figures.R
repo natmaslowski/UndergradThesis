@@ -41,9 +41,10 @@ ggplot(tdata_elev2, aes(x=elevation,y=count.1)) +
 lrmodA <- glmer(count.1 ~ poly(elevation,2)*site_type + (1|site), data=tdata_elev2, family=poisson)
 #simplify A by dropping random effect
 lrmodB <- glm(count.1 ~ poly(elevation,2)*site_type, data = tdata_elev2, family=poisson)
+lrmodC <- glm(count.1 ~ elevation*site_type, data = tdata_elev2, family=poisson)
 
-summary(lrmodB)
-visreg(lrmodB, xvar="elevation", by="site_type")
+summary(lrmodC)
+visreg(lrmodC, xvar="elevation", by="site_type", scale="response")
 
 
 # Figure of richness~elevation as a linear regression ---------------------
@@ -63,15 +64,20 @@ visreg(lrmodD, xvar="elevation", by="site_type", scale="response")
 # Figure of richness~elevation as a boxplot graph -------------------------
 library(dplyr)
 
+#Ok I fixed this so now it shows distinct species per plots 
+
 rich.data <-tdata_elev2%>%
   separate(site,into="site_type",sep="-",remove=FALSE,extra="drop")%>%
   filter(count.1 !=0)%>%
-  group_by(site_type,site,plot)%>%
-  distinct(species)
+  group_by(site_type,site,plot,elevation,species)%>%
+  distinct(site,species)%>%
+  count(species,site)
 
 #boxplot modelling richness as a function of the site type.
 
-ggplot( rich.data,aes(x=site_type,y=count.1))+
+#how do I map richness as a function of elevation?
+
+ggplot( rich.data,aes(x=site,y=n))+
   geom_boxplot()+
   labs( 
     x="Site Type", y = "Species Richness")+
